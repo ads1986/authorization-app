@@ -16,11 +16,8 @@ public class AccountService {
 
     public void addTransaction(Account account, Transaction transaction){
         boolean authorize = authorizerService.authorize(account, transaction);
-        if (authorize) {
-            int balance = account.getBalance() - transaction.getAmount();
-            account.setBalance(balance);
+        if (authorize)
             account.addTransaction(transaction);
-        }
     }
 
 }

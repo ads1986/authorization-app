@@ -4,10 +4,8 @@ import com.authorization.model.Account;
 import com.authorization.model.Rule;
 import com.authorization.model.Transaction;
 import com.authorization.service.AccountService;
-import com.authorization.service.AuthorizerService;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 
 public class Main {
 
@@ -30,7 +28,6 @@ public class Main {
                 .id(1)
                 .balance(500)
                 .status(true)
-                .history(new ArrayList<>())
                 .build();
 
         AccountService accountService = new AccountService(rule, LocalDateTime.now());
