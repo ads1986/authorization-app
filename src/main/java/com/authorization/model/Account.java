@@ -10,11 +10,13 @@ import java.util.List;
 @Setter
 @Getter
 @Builder
-@ToString
 public class Account {
     private int id;
     private int balance;
     private boolean status;
-    private boolean regular;
     private List<Transaction> history;
+    public void addTransaction(Transaction transaction){
+        if (history != null)
+            history.add(transaction);
+    }
 }

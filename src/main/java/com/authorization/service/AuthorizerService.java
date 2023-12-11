@@ -3,32 +3,38 @@ package com.authorization.service;
 import com.authorization.model.Account;
 import com.authorization.model.Rule;
 import com.authorization.model.Transaction;
+import lombok.AllArgsConstructor;
 
 import java.time.LocalDateTime;
 
 import static java.time.DayOfWeek.FRIDAY;
 import static java.time.DayOfWeek.MONDAY;
 
+@AllArgsConstructor
 public class AuthorizerService {
 
-    public Account execute(Account account, Transaction transaction, Rule rule, LocalDateTime now) {
-        boolean isWeekDay = isWeekDay(now);
-        boolean notExceedIndividualTransaction = transaction.getAmount() <= rule.getIndividualTransaction();
+    private Rule rule;
+    private LocalDateTime currentDate;
 
-        if (isWeekDay && notExceedIndividualTransaction) {
-            long currentTotalOfTransactions = getCurrentTotalOfTransactions(account, now);
-            boolean notExceedTransactionPerHour = currentTotalOfTransactions <= rule.getTransactonPerHour();
-
-            if (notExceedTransactionPerHour) {
-                int currentTotalAmount = getCurrentTotalAmount(account, transaction, rule);
-                boolean notExceedLimitPerDay =  currentTotalAmount <= rule.getLimitPerDay();
-
-                if (notExceedLimitPerDay)
-                    addTransaction(account, transaction);
-            }
+    public boolean authorize(Account account, Transaction transaction) {
+        if (account == null || transaction == null) {
+            return false;
         }
 
-        return account;
+        boolean isWeekDay = isWeekDay(this.currentDate);
+        boolean notExceedIndividualTransaction = transaction.getAmount() <= this.rule.getIndividualTransaction();
+
+        if (isWeekDay && notExceedIndividualTransaction) {
+            long currentTotalOfTransactions = getCurrentTotalOfTransactions(account, this.currentDate);
+            boolean notExceedTransactionPerHour = currentTotalOfTransactions <= this.rule.getTransactonPerHour();
+
+            if (notExceedTransactionPerHour) {
+                int currentTotalAmount = getCurrentTotalAmount(account, transaction, this.rule);
+
+                return currentTotalAmount <= this.rule.getLimitPerDay();
+            }
+        }
+        return false;
     }
 
     private boolean isWeekDay(LocalDateTime now){
@@ -56,6 +62,6 @@ public class AuthorizerService {
     private void addTransaction(Account account, Transaction transaction){
         int balance = account.getBalance() - transaction.getAmount();
         account.setBalance(balance);
-        account.getHistory().add(transaction);
+        account.addTransaction(transaction);
     }
 }

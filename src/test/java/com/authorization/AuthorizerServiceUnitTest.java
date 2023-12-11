@@ -17,11 +17,9 @@ public class AuthorizerServiceUnitTest {
     private Rule ruleRegular;
     private Rule rulePremium;
 
-    private LocalDateTime validDate = LocalDateTime.of(2023,12, 8, 16, 0);
+    private final LocalDateTime validDate = LocalDateTime.of(2023,12, 8, 16, 0);
 
-    private LocalDateTime invalidDate = LocalDateTime.of(2023,12, 10, 5, 0);
-
-    private AuthorizerService authorizerService = new AuthorizerService();
+    private final LocalDateTime invalidDate = LocalDateTime.of(2023,12, 10, 5, 0);
 
     @BeforeEach
     void init(){
@@ -54,13 +52,12 @@ public class AuthorizerServiceUnitTest {
                 .id(1)
                 .balance(500)
                 .status(true)
-                .regular(true)
                 .history(new ArrayList<>())
                 .build();
 
-        Account accountReturn = authorizerService.execute(account, transaction, ruleRegular, validDate);
+        boolean authorize = new AuthorizerService(ruleRegular, validDate).authorize(account, transaction);
 
-        Assertions.assertEquals(500, accountReturn.getBalance());
+        Assertions.assertFalse(authorize);
     }
 
     @Test
@@ -81,13 +78,12 @@ public class AuthorizerServiceUnitTest {
                 .id(1)
                 .balance(500)
                 .status(true)
-                .regular(true)
                 .history(transactions)
                 .build();
 
-        Account accountReturn = authorizerService.execute(account, transaction, ruleRegular, validDate);
+        boolean authorize = new AuthorizerService(ruleRegular, validDate).authorize(account, transaction);
 
-        Assertions.assertEquals(500, accountReturn.getBalance());
+        Assertions.assertFalse(authorize);
     }
 
     @Test
@@ -108,13 +104,12 @@ public class AuthorizerServiceUnitTest {
                 .id(1)
                 .balance(500)
                 .status(true)
-                .regular(true)
                 .history(transactions)
                 .build();
 
-        Account accountReturn = authorizerService.execute(account, transaction, ruleRegular, validDate);
+        boolean authorize = new AuthorizerService(ruleRegular, validDate).authorize(account, transaction);
 
-        Assertions.assertEquals(500, accountReturn.getBalance());
+        Assertions.assertFalse(authorize);
     }
 
     @Test
@@ -129,13 +124,12 @@ public class AuthorizerServiceUnitTest {
                 .id(1)
                 .balance(500)
                 .status(true)
-                .regular(true)
                 .history(new ArrayList<>())
                 .build();
 
-        Account accountReturn = authorizerService.execute(account, transaction, ruleRegular, invalidDate);
+        boolean authorize = new AuthorizerService(ruleRegular, invalidDate).authorize(account, transaction);
 
-        Assertions.assertEquals(500, accountReturn.getBalance());
+        Assertions.assertFalse(authorize);
     }
 
     @Test
@@ -150,13 +144,12 @@ public class AuthorizerServiceUnitTest {
                 .id(1)
                 .balance(500)
                 .status(true)
-                .regular(true)
                 .history(new ArrayList<>())
                 .build();
 
-        Account accountReturn = authorizerService.execute(account, transaction, ruleRegular, validDate);
+        boolean authorize = new AuthorizerService(ruleRegular, validDate).authorize(account, transaction);
 
-        Assertions.assertEquals(300, accountReturn.getBalance());
+        Assertions.assertTrue(authorize);
     }
 
     @Test
@@ -171,13 +164,12 @@ public class AuthorizerServiceUnitTest {
                 .id(1)
                 .balance(500)
                 .status(true)
-                .regular(true)
                 .history(new ArrayList<>())
                 .build();
 
-        Account accountReturn = authorizerService.execute(account, transaction, rulePremium, validDate);
+        boolean authorize = new AuthorizerService(rulePremium, validDate).authorize(account, transaction);
 
-        Assertions.assertEquals(500, accountReturn.getBalance());
+        Assertions.assertFalse(authorize);
     }
 
     @Test
@@ -198,13 +190,12 @@ public class AuthorizerServiceUnitTest {
                 .id(1)
                 .balance(500)
                 .status(true)
-                .regular(true)
                 .history(transactions)
                 .build();
 
-        Account accountReturn = authorizerService.execute(account, transaction, rulePremium, validDate);
+        boolean authorize = new AuthorizerService(rulePremium, validDate).authorize(account, transaction);
 
-        Assertions.assertEquals(500, accountReturn.getBalance());
+        Assertions.assertFalse(authorize);
     }
 
     @Test
@@ -225,13 +216,12 @@ public class AuthorizerServiceUnitTest {
                 .id(1)
                 .balance(500)
                 .status(true)
-                .regular(true)
                 .history(transactions)
                 .build();
 
-        Account accountReturn = authorizerService.execute(account, transaction, rulePremium, validDate);
+        boolean authorize = new AuthorizerService(rulePremium, validDate).authorize(account, transaction);
 
-        Assertions.assertEquals(500, accountReturn.getBalance());
+        Assertions.assertFalse(authorize);
     }
 
     @Test
@@ -246,13 +236,12 @@ public class AuthorizerServiceUnitTest {
                 .id(1)
                 .balance(500)
                 .status(true)
-                .regular(true)
                 .history(new ArrayList<>())
                 .build();
 
-        Account accountReturn = authorizerService.execute(account, transaction, rulePremium, invalidDate);
+        boolean authorize = new AuthorizerService(rulePremium, invalidDate).authorize(account, transaction);
 
-        Assertions.assertEquals(500, accountReturn.getBalance());
+        Assertions.assertFalse(authorize);
     }
 
     @Test
@@ -267,12 +256,37 @@ public class AuthorizerServiceUnitTest {
                 .id(1)
                 .balance(500)
                 .status(true)
-                .regular(true)
                 .history(new ArrayList<>())
                 .build();
 
-        Account accountReturn = authorizerService.execute(account, transaction, rulePremium, validDate);
+        boolean authorize = new AuthorizerService(rulePremium, validDate).authorize(account, transaction);
 
-        Assertions.assertEquals(300, accountReturn.getBalance());
+        Assertions.assertTrue(authorize);
+    }
+
+    @Test
+    @DisplayName("User | Adding null account")
+    void test11(){
+        Transaction transaction = Transaction.builder()
+                .amount(200)
+                .date(validDate)
+                .build();
+
+        boolean authorize = new AuthorizerService(ruleRegular, validDate).authorize(null, transaction);
+        Assertions.assertFalse(authorize);
+    }
+
+    @Test
+    @DisplayName("User | Adding null transaction")
+    void test12(){
+        Account account = Account.builder()
+                .id(1)
+                .balance(500)
+                .status(true)
+                .history(new ArrayList<>())
+                .build();
+
+        boolean authorize = new AuthorizerService(ruleRegular, validDate).authorize(account, null);
+        Assertions.assertFalse(authorize);
     }
 }
